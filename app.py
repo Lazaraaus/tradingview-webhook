@@ -1,3 +1,5 @@
+# webHook/app.py 
+# IMPORTS
 import json, config, cbpro
 from flask import Flask, request, jsonify, render_template
 from binance.client import Client
@@ -39,17 +41,18 @@ def welcome():
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    #print(request.data)
+    # Load JSON data 
     data = json.loads(request.data)
-
+    # Check to make sure JSON data contains passphrase from Trading View 
     if data['passphrase'] != config.WEBHOOK_PASSPHRASE:
         return {
             "code": "error",
             "message": "Nice try, invalid passphrase"
         }
-
+    # If good data, parse data [Side, Quantity] 
     side = data['strategy']['order_action'].upper()
     quantity = data['strategy']['order_contracts']
+    # Attempt Order
     order_response = cbpro_order(side, quantity, "XLM-USD")
 
     if order_response:
